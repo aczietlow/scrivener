@@ -29,3 +29,7 @@ Media Converter to transcode mkv files to mp4 files using ffmpeg
 ## Terms
 
 MKV - Matroska Multimedia Container that can hold an unlimited number of video, audio, picture, or subtitle tracks in one file.
+
+MP4 - MPEG-4 Part 14 or MP4 is a digital multimedia container format most commonly used to store video and audio, but it can also be used to store other data such as subtitles and still images.
+
+Scrivener - a person who writes a text, book, or other document for another person.
