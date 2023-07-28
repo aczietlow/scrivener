@@ -38,6 +38,8 @@ Scrivener - a person who writes a text, book, or other document for another pers
 
 The only reason worth doing anything: the pursuit of knowledge!
 
+`ffmpeg -encoders` - List all available encoders
+
 ### Notes
 
 Build sandbox container for test
@@ -52,8 +54,12 @@ Use H264 encoding with a constant rate factor of 23 (default is 28) and AAC audi
 
 `ffmpeg -i "$input_file" -c:v libx264 -crf 23 -c:a aac "$output_file"`
 
-2) `ffmpeg -i "A1_t00.mkv" -c:v libx264 -crf 23 -hide_banner -c:a aac "oliver.mp4"`
+2) `ffmpeg -i "A1_t00.mkv" -c:v libx264 -c:a aac -c:s dvd_subtitle -crf 23 -hide_banner "oliver.mp4"`
 
+3) `fmpeg -i "A1_t00.mkv" -c:v mpeg4 -c:a aac -c:s ass -hide_banner "oliver.mp4"`
+
+Not sure why ffmpeg won't do subtitles. Although the `mpeg4` codec in theory includes subtitles
+Future Chris: It's because the mkv files Im working with use `dvd_subtitle` codec for subtitles. this is a bitmap codec and can't directly be converted to text, but there are tools that can do this.
 
 #### Notes for future Chris
 
