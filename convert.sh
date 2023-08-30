@@ -1,16 +1,16 @@
 #!/bin/bash
 
 # Set input and output directories
-input_dir="/path/to/input/directory"
+input_dir="/media-assets/"
 
-# For every .mkv file in the input directory
-for input_file in "$input_dir"/*.mkv; do
-    # Get the file name without the extension
-    file_name=$(basename "$input_file" .mkv)
+find $input_dir -type f -name "*.mkv" | while read -r input_file; do
+  file_name=$(basename "$input_file" .mkv)
+  file_path=$(dirname "$input_file")
 
-    # Set the output file path
-    output_file="$file_name.mp4"
+  output_file="$file_path/$file_name.mp4"
+  echo "$input_file"
+  echo "$output_file"
 
-    # Convert the file with ffmpeg
-    ffmpeg -i "$input_file" -c:v libx264 -c:a aac -crf 23 "$output_file"
+  ffmpeg -i "$input_file" -c:v libx264 -c:a aac -crf 23 -c:s dvd_subtitle "$output_file"
+  rm "$input_file"
 done

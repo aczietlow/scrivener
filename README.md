@@ -56,18 +56,17 @@ Use H264 encoding with a constant rate factor of 23 (default is 28) and AAC audi
 
 2) `ffmpeg -i "A1_t00.mkv" -c:v libx264 -c:a aac -c:s dvd_subtitle -crf 23 -hide_banner "oliver.mp4"`
 
-3) `fmpeg -i "A1_t00.mkv" -c:v mpeg4 -c:a aac -c:s ass -hide_banner "oliver.mp4"`
+3) `ffmpeg -i "A1_t00.mkv" -c:v mpeg4 -c:a aac -c:s ass -hide_banner "oliver.mp4"`
 
 Not sure why ffmpeg won't do subtitles. Although the `mpeg4` codec in theory includes subtitles
 Future Chris: It's because the mkv files Im working with use `dvd_subtitle` codec for subtitles. this is a bitmap codec and can't directly be converted to text, but there are tools that can do this.
 
 #### Notes for future Chris
 
-Added a successfully converted and encoded copy of lilo for reference.
+Drop mkv files into the assets directory.
 
-I can successfully change the container to MP4, but when I run #2 and attempt to encode from within the container, I get the following error:
+`docker run --rm -v /home/aczietlow/Projects/media-converter/assets:/media-assets aczietlow/mkv-scriv:latest`
+or 
+`docker run --rm -v $unconverted_files:/media-assets aczietlow/mkv-scriv:latest`
 
-> "Internal data stream error."
-
-Look into different ffmpeg commands or maybe add additional system resources to the containre (How to share CPU with docker)
-Also maybe ffmpeg needs additional libraries to do the encoding correctly?
+Later I should create a cron job to periodically scan and start this docker container... or something something k8s/openshift

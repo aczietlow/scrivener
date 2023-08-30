@@ -10,7 +10,11 @@ RUN apt-get update && apt-get install -y \
     ffmpeg \
     && rm -rf /var/lib/apt/lists/*
 
-# This should be mounted, and not part of the image, but it's helpful for testing out ffmpeg tools in the container
-WORKDIR /root/media
+RUN mkdir /media-assets
 
-CMD ["/bin/bash"]
+# Copy file and make executable
+COPY convert.sh /usr/local/bin/convert.sh
+
+RUN chmod +x /usr/local/bin/convert.sh
+
+ENTRYPOINT ["/usr/local/bin/convert.sh"]
