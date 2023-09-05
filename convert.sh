@@ -3,10 +3,10 @@
 # Set input and output directories
 #input_dir="assets/"
 input_dir="/media-assets/"
-debug_out=true
+debug_out=false
 
 function transcode() {
-    ffmpeg -i "$input_file" $video_opts $audio_opts $subtitle_opts  "$output_file"
+    ffmpeg -nostdin -i "$input_file" $video_opts $audio_opts $subtitle_opts  "$output_file"
 }
 
 function debug() {
@@ -23,9 +23,10 @@ function debug() {
       echo "IS AC3 (MVKINFO): $AC3"
       echo "IS AAC (MVKINFO):$AAC"
       echo "IS DTC (MVKINFO): $DTS"
-      echo "video or audio track first (MVKINFO): $order"
+      echo "video_codec or audio track first (MVKINFO): $order"
       echo "audio Codec (ffprobe): $audio_codec"
-      echo "video Codec (ffprobe): $video"
+      echo "video_codec Codec (ffprobe): $video_codec"
+      echo "subtitle_codec Codec (ffprobe): $subtitle_codec"
       echo "fps (MVKINFO): $fps"
 
       echo "output file: $output_file"
@@ -41,8 +42,10 @@ find $input_dir -type f -name "*.mkv" | while read -r input_file; do
 
   #  Detect what audio_codec codec is being used:
   audio_codec=$(ffprobe "$input_file" 2>&1 | sed -n '/Audio:/s/.*: \([a-zA-Z0-9]*\).*/\1/p' | sed 1q)
-  ##  Detect video codec:
-  video=$(ffprobe "$input_file" 2>&1 | sed -n '/Video:/s/.*: \([a-zA-Z0-9]*\).*/\1/p' | sed 1q)
+  #  Detect video_codec codec:
+  video_codec=$(ffprobe "$input_file" 2>&1 | sed -n '/Video:/s/.*: \([a-zA-Z0-9]*\).*/\1/p' | sed 1q)
+  # Detect Subtitle codec:
+  subtitle_codec=$(ffprobe "$input_file" 2>&1 | sed -n 's/.*Subtitle: \([^ ]*\).*/\1/p' | sed 1q)
 
   WIDTH=$(ffprobe -v error -select_streams v:0 -show_entries stream=width -of default=nw=1:nk=1 "$input_file")
   HEIGHT=$(ffprobe -v error -select_streams v:0 -show_entries stream=height -of default=nw=1:nk=1 "$input_file")
@@ -67,9 +70,9 @@ find $input_dir -type f -name "*.mkv" | while read -r input_file; do
   ## Set default subtitle settings:
   # TODO Fix this. dvd_subtitle not always available
 #  subtitle_opts="-c:s dvd_subtitle"
-  subtitle_opts=""
+  subtitle_opts="-c:s mov_text"
 
-  #store the fps of the video track
+  # fps of the video track
   fps=$(mkvinfo "$input_file" | grep duration | sed 's/.*(//' | sed 's/f.*//' | head -n 1)
 
   if [[ $AUDIO_CH == "6" ]]; then
@@ -87,6 +90,21 @@ find $input_dir -type f -name "*.mkv" | while read -r input_file; do
     audio_opts="-c:a aac -vbr 3"
   fi
 
+  if [[ $subtitle_codec == "hdmv_pgs_subtitle" ]]; then
+    # Bitmap subtitle format, common on Bluerays
+    # Look into open Subtitle, or comeback later and use OCR to convert into srt. SubtitleEdit can handle this.
+    subtitle_output_file="$file_path/$parent_dir_name.sup"
+    ffmpeg -nostdin -i "$input_file" -c:s copy -an -vn  "$subtitle_output_file"
+    subtitle_opts=""
+
+ # TODO
+  elif [[ $subtitle_codec == "mov_text" ]]; then
+    subtitle_opts="-c:s mov_text"
+  else
+    # Fallback? Or maybe the fallback has to be no subtitles
+    subtitle_opts="-c:s dvd_subtitle"
+  fi
+
   if [[ $HEIGHT == "2160" ]]; then
     video_opts="-vf scale=-1:1080 -c:v libx264 -crf 18 -preset veryslow"
     output_file="$file_path/$parent_dir_name.mp4"
@@ -97,30 +115,29 @@ find $input_dir -type f -name "*.mkv" | while read -r input_file; do
     transcode
 
     # 720
-    video_opts="-vf scale=-2:720 -c:v libx264 -crf 23 -preset slow"
+    video_opts="-vf scale=-1:720 -c:v libx264 -crf 23 -preset slow"
     output_file="$file_path/$parent_dir_name - 720p.mp4"
     transcode
 
     # 480
-    video_opts="-vf scale=-2:480 -c:v libx264 -crf 23"
+    video_opts="-vf scale=-1:480 -c:v libx264 -crf 23"
     output_file="$file_path/$parent_dir_name - 480p.mp4"
     transcode
 
   elif [[ $HEIGHT == "1080" ]]; then
     video_opts="-vf scale=-1:1080 -c:v libx264 -crf 18 -preset veryslow"
     output_file="$file_path/$parent_dir_name.mp4"
-#    transcode
+    transcode
 
     # 720
     video_opts="-vf scale=-2:720 -c:v libx264 -crf 23 -preset slow"
     output_file="$file_path/$parent_dir_name - 720p.mp4"
-#    transcode
+    transcode
 
     # 480
     video_opts="-vf scale=-2:480 -c:v libx264 -crf 23"
     output_file="$file_path/$parent_dir_name - 480p.mp4"
     transcode
-
 
     video_opts="-vf scale=-2:240 -c:v libx264 -crf 23"
     output_file="$file_path/$parent_dir_name - 240p.mp4"
@@ -129,7 +146,7 @@ find $input_dir -type f -name "*.mkv" | while read -r input_file; do
 
   elif [[ $HEIGHT == "720" ]]; then
     # 720
-    video_opts="-vf scale=-2:720 -c:v libx264 -crf 23 -preset slow"
+    video_opts="-vf scale=-1:720 -c:v libx264 -crf 23 -preset slow"
     output_file="$file_path/$parent_dir_name.mp4"
     transcode
 
@@ -143,7 +160,6 @@ find $input_dir -type f -name "*.mkv" | while read -r input_file; do
     output_file="$file_path/$parent_dir_name - 240p.mp4"
     transcode
 
-# Deal with these if any media actually exists for them.
 #  elif [[ $HEIGHT == "576" ]]; then
 #  elif [[ $HEIGHT == "320" ]]; then
 
