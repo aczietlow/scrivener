@@ -59,7 +59,7 @@ Use H264 encoding with a constant rate factor of 23 (default is 28) and AAC audi
 3) `ffmpeg -i "A1_t00.mkv" -c:v mpeg4 -c:a aac -c:s ass -hide_banner "oliver.mp4"`
 
 Not sure why ffmpeg won't do subtitles. Although the `mpeg4` codec in theory includes subtitles
-Future Chris: It's because the mkv files Im working with use `dvd_subtitle` codec for subtitles. this is a bitmap codec and can't directly be converted to text, but there are tools that can do this.
+Future Chris: It's because the mkv files I'm working with use `dvd_subtitle` codec for subtitles. this is a bitmap codec and can't directly be converted to text, but there are tools that can do this.
 
 #### Notes for future Chris
 
@@ -70,3 +70,8 @@ or
 `docker run --rm -v $unconverted_files:/media-assets aczietlow/mkv-scriv:latest`
 
 Later I should create a cron job to periodically scan and start this docker container... or something something k8s/openshift
+
+Additionally, create a script that moves them to the remote server when done converting
+
+`scp -r ./Cinderella\ \(2015\) aczietlow@192.168.1.235:/home/aczietlow/Media2/Movies/`
+`scp -c aes128-ctr -r /home/aczietlow/Projects/media-converter/assets/Transcoded/* aczietlow@192.168.1.235:/home/aczietlow/Media2/Movies/`
