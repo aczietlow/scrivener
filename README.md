@@ -75,3 +75,10 @@ Additionally, create a script that moves them to the remote server when done con
 
 `scp -r ./Cinderella\ \(2015\) aczietlow@192.168.1.235:/home/aczietlow/Media2/Movies/`
 `scp -c aes128-ctr -r /home/aczietlow/Projects/media-converter/assets/Transcoded/* aczietlow@192.168.1.235:/home/aczietlow/Media2/Movies/`
+
+##### Subtitles
+
+
+Need to add switching logic, and better detection here. Look more into soft vs hard subtitles. i.e. separate text file vs burning into the video.
+https://ffmpeg.org/ffmpeg-filters.html#subtitles
+https://en.wikibooks.org/wiki/FFMPEG_An_Intermediate_Guide/subtitle_options
