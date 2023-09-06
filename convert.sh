@@ -6,7 +6,7 @@ input_dir="/media-assets/"
 debug_out=false
 
 function transcode() {
-    ffmpeg -nostdin -i "$input_file" $video_opts $audio_opts $subtitle_opts "$output_file"
+    ffmpeg -nostdin -hide_banner -i "$input_file" $video_opts $audio_opts $subtitle_opts "$output_file"
 }
 
 function debug() {
