@@ -79,7 +79,7 @@ find $input_dir -type f -name "*.mkv" | while read -r input_file; do
   if [[ $AUDIO_CH == "6" ]]; then
     # TODO Figure out if we want to keep this long term? i.e. have a standard and surround sound version.
     # Downmix 6ch audio to 2ch aac
-   audio_opts="-af aresample=matrix_encoding=dplii -ac 2 -c:a acc -strict -2 -b:a 128k"
+   audio_opts="-af aresample=matrix_encoding=dplii -ac 2 -c:a aac -strict -2 -b:a 128k"
   elif [[ $AUDIO_CODEC == "ac3" ]]; then
     # Convert ac3 audio to aac for better compatibility
     audio_opts="-c:a aac -strict -2 -b:a 128k"
@@ -184,7 +184,6 @@ find $input_dir -type f -name "*.mkv" | while read -r input_file; do
   if $debug_out; then
     debug
   fi
-#  ffmpeg -i "$input_file" -c:v libx264 -c:a aac -crf 23 -c:s dvd_subtitle "$output_file"
 # TODO add opt to delete source file when done.
-#  rm "$input_file"
+  rm "$input_file"
 done
