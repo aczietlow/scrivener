@@ -6,7 +6,7 @@ input_dir="/media-assets/"
 debug_out=false
 
 function transcode() {
-    ffmpeg -nostdin -i "$input_file" $video_opts $audio_opts $subtitle_opts  "$output_file"
+    ffmpeg -nostdin -i "$input_file" $video_opts $audio_opts $subtitle_opts "$output_file"
 }
 
 function debug() {
@@ -75,6 +75,7 @@ find $input_dir -type f -name "*.mkv" | while read -r input_file; do
   # fps of the video track
   fps=$(mkvinfo "$input_file" | grep duration | sed 's/.*(//' | sed 's/f.*//' | head -n 1)
 
+  # TODO Add truehd
   if [[ $AUDIO_CH == "6" ]]; then
     # TODO Figure out if we want to keep this long term? i.e. have a standard and surround sound version.
     # Downmix 6ch audio to 2ch aac
@@ -125,7 +126,7 @@ find $input_dir -type f -name "*.mkv" | while read -r input_file; do
     transcode
 
   elif [[ $HEIGHT == "1080" ]]; then
-    video_opts="-vf scale=-1:1080 -c:v libx264 -crf 18 -preset veryslow"
+    video_opts="-c:v libx264 -crf 18 -preset veryslow"
     output_file="$file_path/$parent_dir_name.mp4"
     transcode
 

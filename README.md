@@ -3,7 +3,7 @@ Media Converter to transcode mkv files to mp4 files using ffmpeg
 ## Requirements
 
 - ffmpeg
-- 
+- mkvtoolnix
 
 
 ## Installation (@TODO)
@@ -21,6 +21,34 @@ Media Converter to transcode mkv files to mp4 files using ffmpeg
 ```bash
 #sudo dnf install ffmpeg mkvtoolnix mkvtoolnix-gui mkvtoolnix-doc mkvtoolnix-qt mkvtoolnix-gui mkvtoolnix-gui-doc mkvtoolnix-gui-qt mkvtoolnix-gui-common mkvtoolnix-gui-extra mkvtoolnix-gui-extra-doc mkvtoolnix-gui-extra-qt
 ```
+
+## Usage 
+
+Add mkv container files into the `assets directory` inside a folder with the name of movie to be transcribed. For example:
+
+```
+./assets/Cinderella/t001.mkv
+./assets/Top Gun/a001.mkv
+./assets/The Little Mermaid/b001.mkv
+```
+
+Run `docker run --rm -v /path/to/assets:/media-assets aczietlow/mkv-scriv:latest`
+
+![MKV conversion.jpg](MKV%20conversion.jpg)
+
+This will process a single mkv per execution. So after a single run, assuming 1080p MKV files (common from Blu-ray formats) you may have output like follows: 
+
+```
+./assets/Cinderella/Cinderella.mp4
+./assets/Cinderella/Cinderella - 720p.mp4
+./assets/Cinderella/Cinderella - 480p.mp4
+./assets/Cinderella/Cinderella - 240p.mp4
+./assets/Top Gun/a001.mkv
+./assets/The Little Mermaid/b001.mkv
+```
+
+
+Notice that during clean up the scrivener will delete the mkv file, as it's no longer need. 
 
 ## License
 
@@ -42,24 +70,6 @@ The only reason worth doing anything: the pursuit of knowledge!
 
 ### Notes
 
-Build sandbox container for test
-`docker run -v ./assets:/root/media -it --rm aczietlow/mkv-scriv /bin/bash`
-
-Straight container copy. No encoding. Kind of defeats the whole purpose
-1) `ffmpeg -i A1_t00.mkv -c copy oliver.mp4`
-
--> But why though? 
-
-Use H264 encoding with a constant rate factor of 23 (default is 28) and AAC audio codec.
-
-`ffmpeg -i "$input_file" -c:v libx264 -crf 23 -c:a aac "$output_file"`
-
-2) `ffmpeg -i "A1_t00.mkv" -c:v libx264 -c:a aac -c:s dvd_subtitle -crf 23 -hide_banner "oliver.mp4"`
-
-3) `ffmpeg -i "A1_t00.mkv" -c:v mpeg4 -c:a aac -c:s ass -hide_banner "oliver.mp4"`
-
-Not sure why ffmpeg won't do subtitles. Although the `mpeg4` codec in theory includes subtitles
-Future Chris: It's because the mkv files I'm working with use `dvd_subtitle` codec for subtitles. this is a bitmap codec and can't directly be converted to text, but there are tools that can do this.
 
 #### Notes for future Chris
 
@@ -74,10 +84,13 @@ Later I should create a cron job to periodically scan and start this docker cont
 Additionally, create a script that moves them to the remote server when done converting
 
 `scp -r ./Cinderella\ \(2015\) aczietlow@192.168.1.235:/home/aczietlow/Media2/Movies/`
-`scp -c aes128-ctr -r /home/aczietlow/Projects/media-converter/assets/Transcoded/* aczietlow@192.168.1.235:/home/aczietlow/Media2/Movies/`
+`scp -c aes128-ctr -r /home/aczietlow/Projects/media-converter/assets/Transcoded/* aczietlow@k8s:/home/aczietlow/Media2/Movies/`
+
+## TODO
 
 ##### Subtitles
 
+Should automatically detect subtitle codec from the mkv track, and transcode accordingly. 
 
 Need to add switching logic, and better detection here. Look more into soft vs hard subtitles. i.e. separate text file vs burning into the video.
 https://ffmpeg.org/ffmpeg-filters.html#subtitles
